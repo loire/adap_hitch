@@ -402,6 +402,7 @@ int main(int ac, char* av[])
 				/////////////////////////////////////////////
 
 				if (not mut)
+
 				{
 					cout << "intialize populations" << endl;
 					IntializePop(pop,Fik,s_num,N,n,loc);

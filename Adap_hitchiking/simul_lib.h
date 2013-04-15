@@ -192,6 +192,7 @@ inline void ComputeWeirFst(double ** Fik,double &FSTWeir,int &N,int &n,int &nbS)
 //	int nloci;
 //	nloci = loci.size();
 
+
 	double * pbar = new double [nbS];	// fréquence allèle moyenne (métapop)
 	double ss,ss2,sumss,nc;
 	double num,den;
