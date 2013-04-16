@@ -18,7 +18,7 @@ struct chr_diplo
 	boost::dynamic_bitset<> chr2; // selected loci
 };
 
-
+// Test of github commit
 inline void IntializePop(chr_diplo ** &pop,double ** &Fik, int &s_num,int &N,int &n,int &loc)
 {
 	int i,j,k;
