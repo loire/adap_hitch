@@ -10,6 +10,7 @@
 #include <boost/dynamic_bitset.hpp>
 #include <boost/program_options.hpp>
 #include <boost/program_options/options_description.hpp>
+#include <boost/algorithm/string.hpp>
 #include <omp.h>
 #include <iomanip>
 #include <libconfig.h++>
@@ -17,6 +18,7 @@
 #include "simul_lib.h"
 
 namespace po = boost::program_options;
+namespace bs = boost::algorithm;
 using namespace std;
 using namespace libconfig;
 MTRand rnd;
@@ -210,8 +212,58 @@ int main(int ac, char* av[])
 	double as_h = as_h_vals[0];
 	double ts = ts_vals[0];
 	double ts_h = ts_h_vals[0];
+	string GS = Genstruct;
 
 
+	int nbS = 0; // number of loci
+	vector< int > neutral_pos;
+	vector< int > adap_pos;
+	vector< int > assort_pos;
+	vector< int > trait_pos;
+	int cur_pos=0;
+	int nb = 0;
+	string cur_string;
+	//////////////////////////////////
+	// Parsing genstruct to extract infos
+	//////////////////////////////////
+
+	typedef vector< string > split_vector_type;
+	split_vector_type SplitVec;
+	bs::split( SplitVec, GS, bs::is_any_of("-") );
+
+	for (int unsigned i = 0 ; i < SplitVec.size() ; i++)
+		{
+		cur_string=SplitVec[i][1];
+		cout << boost::lexical_cast<int>(cur_string[0]) << endl;
+		nb = boost::lexical_cast<int>(SplitVec[i][0]);
+
+		if (cur_string.compare("n")==0 or cur_string.compare("N") == 0)
+		{
+			for (int j = cur_pos ; j < cur_pos + nb ; j++)
+				neutral_pos.push_back(j);
+		}
+		if (cur_string.compare("s")==0 or cur_string.compare("S") == 0)
+		{
+			for (int j = cur_pos ; j < cur_pos + nb ; j++)
+				adap_pos.push_back(j);
+		}
+		if (cur_string.compare("a")==0 or cur_string.compare("A") == 0)
+		{
+			for (int j = cur_pos ; j < cur_pos + nb ; j++)
+				assort_pos.push_back(j);
+		}
+		if (cur_string.compare("t")==0 or cur_string.compare("T") == 0)
+		{
+			for (int j = cur_pos ; j < cur_pos + nb ; j++)
+				trait_pos.push_back(j);
+		}
+
+		}
+
+	HERe
+
+	cout << "nbS: " << nbS << endl;
+//	cout << "assort_pos "<< assort_pos << endl;
 	////// First value for each parameter is choosen //////////
 
 
@@ -226,8 +278,8 @@ int main(int ac, char* av[])
 	cout << "mutation ? " << mut << endl;
 	if (mut) cout << "mutation rate: " << U << endl;
 	cout << "pas :" << pas << endl;
-
-
+	cout << "__________________________________" << endl;
+	cout << GS << endl;
 	cout << "__________________________________" << endl;
 	cout << "selective values of adaptative locus: " << s << endl;
 	cout << "dominance of adapative locus: " << h << endl;
