@@ -51,7 +51,10 @@ inline void IntializePop(chr_diplo ** &pop,double ** &Fik, int &s_num,int &N,int
 			Fik[i][k]=0.0;
 	}
 };
-// TEST
+
+
+
+
 
 
 inline void ComputeFreq(chr_diplo ** &pop, double ** &Fik, double ** &TmpFik, int &n,int &N, int &nbS)
