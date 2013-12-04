@@ -249,7 +249,7 @@ inline void ComputeWeirFst(double ** Fik,double &FSTWeir,int &N,int &n,int &nbS)
 
 
 
-inline void rec(double &a_r,double &n_r, int &N_1, int &s_num, int &nbS, chr_diplo &res, chr_diplo &c1, chr_diplo &c2)
+inline void rec(vector <double> &recombination_map , int &N_1, int &nbS, chr_diplo &res, chr_diplo &c1, chr_diplo &c2)
 {
 	int nbCo;
 	vector<int> pos;
@@ -268,19 +268,15 @@ inline void rec(double &a_r,double &n_r, int &N_1, int &s_num, int &nbS, chr_dip
 	//	pos.push_back(rnd.randInt(nS_2));
 	//sort(pos.begin(), pos.end());
 	nbCo=0;
-	for (j=0; j< s_num; j++)
+	for (j=0; j< nbS; j++)
 	{
-		if ( rnd.rand() < a_r )
+		if ( rnd.rand() < recombination_map[j] )
 		{
 			pos.push_back(j);
 			nbCo++;
 		}
 	}
-	if (rnd.rand() < n_r)
-	{
-		pos.push_back(s_num);
-		nbCo++;
-	}
+
 	// recombination mask:
 
 	for (j = 0; j < nbCo; j++)
@@ -302,19 +298,15 @@ inline void rec(double &a_r,double &n_r, int &N_1, int &s_num, int &nbS, chr_dip
 	off1.clear();
 	off2.clear();
 	nbCo=0;
-	for (j=0; j< s_num; j++)
+	for (j=0; j< nbS; j++)
 	{
-		if ( rnd.rand() < a_r )
+		if ( rnd.rand() < recombination_map[j] )
 		{
 			pos.push_back(j);
 			nbCo++;
 		}
 	}
-	if (rnd.rand() < n_r )
-	{
-		pos.push_back(s_num);
-		nbCo++;
-	}
+
 	// recombination mask:
 	for (j = 0; j < nbCo; j++)
 		rec.resize(pos[j], (j % 2) == 0 ? 0 : 1);
@@ -360,7 +352,7 @@ inline void mutation_all_site(chr_diplo ** &pop, int nbS, int n, int N,double U)
 		}
 	}
 }
-
+// to modify
 inline void fitness(double &hom_00_0, double &hom_11_0,double &het_10_0,double &hom_00_1, double &hom_11_1,double &het_10_1, int &s_num, int &loc, int &n, int &N, boost::dynamic_bitset<> &mask, double ** &Wij,double * &wbar,double * &wmax,chr_diplo ** &pop)
 {
 	int i,j;
@@ -460,7 +452,7 @@ inline void fitness(double &hom_00_0, double &hom_11_0,double &het_10_0,double &
 
 }
 
-
+// to modify
 inline void twoDemeMigration(int &n, int &N,int &N_1, double &m, double &a_r,double &n_r, int &s_num, int &nbS, double ** &Wij,  double * &wmax, chr_diplo ** &temp, chr_diplo ** &pop)
 {
 	int i,j,ind;
@@ -551,100 +543,6 @@ inline void twoDemeMigration(int &n, int &N,int &N_1, double &m, double &a_r,dou
 
 };
 
-
-inline void twoDemeMigrationWithNeutralMig(int &n, int &N,int &N_1, double &m, double &a_r,double &n_r, int &s_num, int &nbS, double ** &Wij,  double * &wmax, chr_diplo ** &temp, chr_diplo ** &pop)
-{
-	int i,j,ind;
-	int par1,par2;
-	// Deme 0:
-	for (ind = 0;  ind < N ; ind++)
-	{
-		// Phillopatric
-
-		if (rnd.rand()>m)
-		{
-			do
-			{
-				par1 = rnd.randInt(N_1);
-			}
-			while (rnd.rand() > Wij[0][par1] / wmax[0]);
-
-			do
-			{
-				par2 = rnd.randInt(N_1);
-			}
-			while (rnd.rand() > Wij[0][par2] / wmax[0]);
-			// recombination
-			rec(a_r, n_r, N_1, s_num, nbS, temp[0][ind], pop[0][par1], pop[0][par2]);
-		}
-		else  // migrants:
-		{
-			do
-			{
-				par1 = rnd.randInt(N_1);
-			}
-			while (rnd.rand() > Wij[1][par1] / wmax[1]);
-
-			do
-			{
-				par2 = rnd.randInt(N_1);
-			}
-			while (rnd.rand() > Wij[1][par2] / wmax[1]);
-			// recombination:
-			rec(a_r,n_r,N_1,s_num, nbS,temp[0][ind], pop[1][par1], pop[1][par2]);
-		}
-	}
-	// Deme 1:
-
-	for (ind = 0;  ind < N ; ind++)
-	{
-
-		// Phillopatric:
-		if (rnd.rand()>m)
-		{
-			do
-			{
-				par1 = rnd.randInt(N_1);
-			}
-			while (rnd.rand() > Wij[1][par1] / wmax[1]);
-
-			do
-			{
-				par2 = rnd.randInt(N_1);
-			}
-			while (rnd.rand() > Wij[1][par2] / wmax[1]);
-			// recombination:
-			rec(a_r,n_r,N_1,s_num, nbS,temp[1][ind], pop[1][par1], pop[1][par2]);
-		}
-		else   // migrants:
-		{
-			do
-			{
-				par1 = rnd.randInt(N_1);
-			}
-			while (rnd.rand() > Wij[0][par1] / wmax[0]);
-
-			do
-			{
-				par2 = rnd.randInt(N_1);
-			}
-			while (rnd.rand() > Wij[0][par2] / wmax[0]);
-			// recombination:
-			rec(a_r,n_r,N_1,s_num, nbS,temp[1][ind], pop[0][par1], pop[0][par2]);
-			temp[1][ind].chr1[s_num]=1;
-			temp[1][ind].chr2[s_num]=1;
-		}
-	}
-	#pragma omp parallel for
-	for (i=0; i < n ; i++)
-	{
-		for (j=0; j< N ; j++)
-		{
-			pop[i][j]=temp[i][j];
-		}
-	}
-
-};
 
 
 inline void ComputeResultValues(double ** &Fik, int N,int &nbS, double n_r, double &me,double &Fst)

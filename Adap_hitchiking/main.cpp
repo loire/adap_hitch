@@ -205,64 +205,133 @@ int main(int ac, char* av[])
 	int N = N_vals[0];			// Size of deme
 	double m = m_vals[0];		// Migration rate
 	double U = U_vals[0];		// Mutation rate
-
 	double s = s_vals[0];		// adaptation locus strength
 	double h = h_vals[0];		// dominance of adaptation locus
 	double as = as_vals[0];		// Assortment strength
 	double as_h = as_h_vals[0];
 	double ts = ts_vals[0];
 	double ts_h = ts_h_vals[0];
+
+
+	//////////////////////////////////
+	// Parsing GS to extract infos of genetic structure
+	// And  RM do get recombination vector
+	//////////////////////////////////
 	string GS = Genstruct;
 
 
 	int nbS = 0; // number of loci
-	vector< int > neutral_pos;
-	vector< int > adap_pos;
-	vector< int > assort_pos;
-	vector< int > trait_pos;
+	vector< int > neutral_pos; // position of neutral loci
+	vector< int > adap_pos;	// position of local adaptation loci
+	vector< int > assort_pos;	// position of assortment loci
+	vector< int > trait_pos;	// position of trait loci
+
+	vector <float> recombinationMap;
+	vector <string >  SplitGS;
+	bs::split( SplitGS, GS, bs::is_any_of("-+/ \t") );		// split according to "-" char
+
+	//////////////////////////////////////////////////
+	//// Test for correctness of parameter entry
+	/////////////////////////////////////////////////
+	double totalsite = SplitGS.size();
+	double totalrecval = Recmap.getLength();
+
+	if (totalrecval != totalsite*2-1)
+	{
+		cout << "\n\n\n\n############################                 !!!!!!!!!!!!!!!!!!!!!                  ###########################\n";
+
+		cout << "Number of site and number of recombination values do not match (easy to make a mistake, don't beat yourself).\n"
+				<< "Please enter one value per groupe of site, and one for each position between groups.\n"
+				<< "Provide a recombination value even for groupe of site of size 1.\n"
+				<< "exemple:\n"
+				<< "structure_genetic = \"3n+1a+5s+3n+1t\"\n"
+				<< "mean 5 groups of loci. And you need 4 values of for each position between group, thus an correct entry for recombination map can be:\n"
+				<< "recombination_map = [0.1,0.5,0.2,0.5,0.3,0.5,0.4,0.5,0.45]\n"
+				<< "Actual representation of the chromosome: N*0.1*N*0.1*N*0.5*A*0.5*S*0.3*S*0.3*S*0.3*S*0.3*S*0.5*N*0.4*N*0.4*0.5*T*0.45*T\n" ;
+
+		cout << "############################                 !!!!!!!!!!!!!!!!!!!!!                  ###########################\n\n\n\n\n\n";
+		return 0;
+	}
+
 	int cur_pos=0;
-	int nb = 0;
+	int size_group = 0;
+	int cur_group_rec=0;
+	float cur_rec=0.0;
 	string cur_string;
-	//////////////////////////////////
-	// Parsing genstruct to extract infos
-	//////////////////////////////////
 
-	typedef vector< string > split_vector_type;
-	split_vector_type SplitVec;
-	bs::split( SplitVec, GS, bs::is_any_of("-") );
-
-	for (int unsigned i = 0 ; i < SplitVec.size() ; i++)
+	for (int unsigned i = 0 ; i < SplitGS.size() ; i++)
 		{
-		cur_string=SplitVec[i][1];
-		cout << boost::lexical_cast<int>(cur_string[0]) << endl;
-		nb = boost::lexical_cast<int>(SplitVec[i][0]);
+
+		cout << *SplitGS[i].rbegin() << endl;
+
+		cur_string = *SplitGS[i].rbegin();
+
+		size_group = boost::lexical_cast<int>(SplitGS[i].substr(0, SplitGS[i].size()-1));
+
+		cout << "size group:" << size_group << endl;
+		nbS+=size_group;
+		cout << "nbS at this time:" << nbS << endl;
+		cur_rec = Recmap[cur_group_rec];
+
+		cout << "cur_rec" << cur_rec << endl;
+
+		recombinationMap.resize(recombinationMap.size()+size_group-1,cur_rec);
+		cur_group_rec+=1;
+		cout << Recmap.getLength() << endl;
+
+		if (cur_group_rec < Recmap.getLength()-1)
+		{
+			cur_rec = Recmap[cur_group_rec];
+			recombinationMap.push_back(cur_rec);
+		}
 
 		if (cur_string.compare("n")==0 or cur_string.compare("N") == 0)
 		{
-			for (int j = cur_pos ; j < cur_pos + nb ; j++)
+			for (int j = cur_pos ; j < cur_pos + size_group ; j++)
 				neutral_pos.push_back(j);
 		}
 		if (cur_string.compare("s")==0 or cur_string.compare("S") == 0)
 		{
-			for (int j = cur_pos ; j < cur_pos + nb ; j++)
+			for (int j = cur_pos ; j < cur_pos + size_group ; j++)
 				adap_pos.push_back(j);
 		}
 		if (cur_string.compare("a")==0 or cur_string.compare("A") == 0)
 		{
-			for (int j = cur_pos ; j < cur_pos + nb ; j++)
+			for (int j = cur_pos ; j < cur_pos + size_group ; j++)
 				assort_pos.push_back(j);
 		}
 		if (cur_string.compare("t")==0 or cur_string.compare("T") == 0)
 		{
-			for (int j = cur_pos ; j < cur_pos + nb ; j++)
+			for (int j = cur_pos ; j < cur_pos + size_group ; j++)
 				trait_pos.push_back(j);
 		}
+		cur_pos+=size_group;
+		cur_group_rec+=1;
+	}
 
-		}
 
-	HERe
 
 	cout << "nbS: " << nbS << endl;
+	vector <int>::iterator it;
+	cout << "neutral positions:" << endl;
+	for (it=neutral_pos.begin();it!=neutral_pos.end();++it)
+		cout << "n: " << *it << endl;
+	cout << "adap positions:" << endl;
+	for (it=adap_pos.begin();it!=adap_pos.end();++it)
+		cout << *it << endl;
+	cout << "assort positions:" << endl;
+	for (it=assort_pos.begin();it!=assort_pos.end();++it)
+		cout << *it << endl;
+	cout << "trait positions:" << endl;
+	for (it=trait_pos.begin();it!=trait_pos.end();++it)
+		cout << *it << endl;
+
+	vector < float >:: iterator it2;
+	cout << "recombination map:";
+	for (it2 = recombinationMap.begin(); it2 != recombinationMap.end() ; ++it2)
+		cout << *it2 << " ";
+	cout << endl;
+
 //	cout << "assort_pos "<< assort_pos << endl;
 	////// First value for each parameter is choosen //////////
 
